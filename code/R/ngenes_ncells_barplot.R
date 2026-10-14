@@ -26,12 +26,7 @@ opt <- parse_args(OptionParser(option_list = list(
 dir.create(opt$`out-dir`, recursive = TRUE, showWarnings = FALSE)
 
 SELF_GENE_SET <- setNames(rep("all", length(TECH_ORDER)), TECH_ORDER)
-SHARED_PANEL_GENE_SET <- c(
-  atera = "shared_panel_genes", visiumhd = "shared_panel_genes", xenium_breast100 = "shared_panel_genes",
-  stratamap_ill_5um_Grade1 = "shared_panel_genes", stratamap_ill_5um_Grade2 = "shared_panel_genes",
-  stratamap_ill_5um_Grade3 = "shared_panel_genes",
-  xenium_5k = "panel_genes", xenium_biomarkers = "panel_genes"
-)
+SHARED_PANEL_GENE_SET <- setNames(vapply(TECH_ORDER, shared_gene_set_for, character(1)), TECH_ORDER)
 
 ngenes_rows <- list()
 for (tech in TECH_ORDER) {

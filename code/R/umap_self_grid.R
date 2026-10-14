@@ -26,11 +26,6 @@ dir.create(opt$`out-dir`, recursive = TRUE, showWarnings = FALSE)
 
 pal <- get_celltype_palette()
 
-ORDER <- c(
-  "stratamap_ill_5um_Grade1", "stratamap_ill_5um_Grade2", "stratamap_ill_5um_Grade3",
-  "visiumhd", "atera", "xenium_5k", "xenium_biomarkers", "xenium_breast100"
-)
-
 # Every sample's "self" is its full QC'd gene panel ("all") - kept uniform across technologies
 # (including StrataMap) for consistency with the ARI figure's SELF_GENE_SET, rather than
 # restricting StrataMap to the protein-coding+lncRNA "informative" subset. Checked in the original
@@ -54,7 +49,7 @@ plot_bundle <- function(bundle_path, label) {
 }
 
 panels <- list()
-for (tech in ORDER) {
+for (tech in TECH_ORDER) {
   label <- CELL_LEVEL_SAMPLES$label[CELL_LEVEL_SAMPLES$technology == tech]
   bundle_path <- reductions_path(tech, self_gene_set(tech))
   if (!file.exists(bundle_path)) { cat("SKIPPING", tech, "- no", bundle_path, "\n"); next }

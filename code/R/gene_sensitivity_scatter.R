@@ -75,7 +75,7 @@ save_scatter <- function(p, name) {
   cat("Saved:", out_png, "\n")
 }
 
-# x = shared_panel_genes (353) median transcripts/cell, y = own_panel (self) median transcripts/cell.
+# x = shared_panel_genes median transcripts/cell, y = own_panel (self) median transcripts/cell.
 own <- stats_df %>% filter(scope == "own_panel", metric == "transcripts_per_cell") %>%
   select(technology, short_label, y = median, y_lo = p25, y_hi = p75, size = n)
 shared <- stats_df %>% filter(scope == "shared_panel_genes", metric == "transcripts_per_cell") %>%
@@ -83,6 +83,7 @@ shared <- stats_df %>% filter(scope == "shared_panel_genes", metric == "transcri
 d <- inner_join(own, shared, by = "technology") %>% arrange(desc(size))
 write.csv(d, file.path(opt$`out-dir`, "scatter_self_vs_shared_panel_genes_transcripts_per_cell_median.csv"), row.names = FALSE)
 
-title <- "Transcripts / cell / gene (median):\nself-panel vs. shared panel genes (353)"
-p <- build_scatter(d, title, "Shared panel genes (353)", "Self-panel", "Genes in self panel", "log10", same_units = TRUE)
+n_shared <- nrow(read.csv(SHARED_PANEL_GENE_LIST_PATH))
+title <- paste0("Transcripts / cell / gene (median):\nself-panel vs. shared panel genes (", n_shared, ")")
+p <- build_scatter(d, title, paste0("Shared panel genes (", n_shared, ")"), "Self-panel", "Genes in self panel", "log10", same_units = TRUE)
 save_scatter(p, "scatter_self_vs_shared_panel_genes_transcripts_per_cell_median_log10")

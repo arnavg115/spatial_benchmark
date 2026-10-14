@@ -251,12 +251,44 @@ save_post <- function(path, plot, kind) {
 # Gene-set resolution, shared by every script that needs to restrict a QCed object to a named gene
 # set (embeddings, sensitivity, count-distribution extraction). Kept in one place here instead of
 # duplicated per script the way the internal lab version did.
+PANEL_GENE_LIST_PATH <- file.path(REFERENCE_DIR, "breast100_gene_list.csv")
+SHARED_PANEL_GENE_LIST_PATH <- file.path(REFERENCE_DIR, "shared_panel_gene_list.csv")
+
 gene_list_for_set <- function(set_name, all_genes) {
   if (set_name == "all") return(all_genes)
-  path_for <- c(panel_genes = "breast100_gene_list.csv", shared_panel_genes = "shared_panel_gene_list.csv")
+  path_for <- c(panel_genes = PANEL_GENE_LIST_PATH, shared_panel_genes = SHARED_PANEL_GENE_LIST_PATH)
   if (set_name %in% names(path_for)) {
-    genes <- read.csv(file.path(REFERENCE_DIR, path_for[[set_name]]))$gene_symbol
+    genes <- read.csv(path_for[[set_name]])$gene_symbol
     return(intersect(all_genes, genes))
   }
   stop("Unknown gene set: ", set_name)
+}
+
+# Which gene set stands in for the "shared panel genes" axis (figs 5/8) per technology. Xenium 5k/
+# Xenium MM's own panels barely overlap the shared list, so they use their own panel_genes
+# (breast+100 intersection) as a proxy instead.
+shared_gene_set_for <- function(tech) {
+  if (tech %in% c("xenium_5k", "xenium_biomarkers")) "panel_genes" else "shared_panel_genes"
+}
+
+# separation_metric.R output file per technology, as 02_preprocess.sh names them.
+SEPARATION_METRIC_CSV <- c(
+  atera = "separation_metric_atera_cell.csv",
+  visiumhd = "separation_metric_visiumhd_cell.csv",
+  xenium_5k = "separation_metric_xenium_5k_cell.csv",
+  xenium_biomarkers = "separation_metric_xenium_biomarkers_cell.csv",
+  xenium_breast100 = "separation_metric_xenium_breast100_cell.csv",
+  stratamap_ill_5um_Grade1 = "separation_metric_stratamap_ill_5um_Grade1.csv",
+  stratamap_ill_5um_Grade2 = "separation_metric_stratamap_ill_5um_Grade2.csv",
+  stratamap_ill_5um_Grade3 = "separation_metric_stratamap_ill_5um_Grade3.csv"
+)
+
+# Other benchmarks (benchmarks/<name>/registry.R) override the breast sample list, labels, colors,
+# path helpers and gene-list paths above - selected with the BENCHMARK environment variable, which
+# each benchmark's own 02/03 scripts export. Unset (or "breast") = the original 8-sample comparison.
+BENCHMARK <- Sys.getenv("BENCHMARK", "breast")
+if (BENCHMARK != "breast") {
+  registry <- file.path(REPRO_ROOT, "benchmarks", BENCHMARK, "registry.R")
+  if (!file.exists(registry)) stop("BENCHMARK=", BENCHMARK, " but no registry at ", registry)
+  source(registry)
 }

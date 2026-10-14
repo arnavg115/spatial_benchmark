@@ -23,7 +23,6 @@ MIN_GENES <- opt$`min-genes`
 stopifnot("--technology must be one of CELL_LEVEL_SAMPLES$technology" = opt$technology %in% CELL_LEVEL_SAMPLES$technology)
 dir.create(opt$`out-dir`, recursive = TRUE, showWarnings = FALSE)
 
-is_stratamap <- grepl("^stratamap_", opt$technology)
 cat("Technology:", opt$technology, "\n")
 obj <- readRDS(qc_rds_path(opt$technology))
 assay_name <- DefaultAssay(obj)
@@ -44,16 +43,10 @@ if (file.exists(file.path(rctd_dir, "spot_results.parquet"))) {
 # (ngenes_ncells_barplot.R, "all" for the Self bar + shared_panel_genes/panel_genes for the Shared
 # bar) actually read - atera_genes/xenium_5k_genes/visiumhd_genes/informative were computed by the
 # original internal pipeline for other distribution plots not in this figure set.
-requested_sets <- c("all")
-# shared_panel_genes: the technologies it was built from (atera/visiumhd/xenium_breast100/
-# stratamap); xenium_5k/xenium_biomarkers instead need "panel_genes" as their shared-panel proxy
-# (ngenes_ncells_barplot.R's SHARED_PANEL_GENE_SET) since their own panels barely overlap the
-# breast+100 gene list to begin with.
-if (is_stratamap || opt$technology %in% c("atera", "visiumhd", "xenium_breast100")) {
-  requested_sets <- c(requested_sets, "shared_panel_genes")
-} else {
-  requested_sets <- c(requested_sets, "panel_genes")
-}
+# Plus each technology's shared-panel axis: shared_panel_genes for the technologies it was built
+# from, panel_genes as the proxy for xenium_5k/xenium_biomarkers (plot_common.R's
+# shared_gene_set_for()) since their own panels barely overlap the breast+100 gene list to begin with.
+requested_sets <- c("all", shared_gene_set_for(opt$technology))
 
 rows <- list()
 for (set_name in requested_sets) {

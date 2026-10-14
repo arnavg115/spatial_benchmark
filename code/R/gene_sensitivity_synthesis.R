@@ -25,16 +25,18 @@ opt <- parse_args(OptionParser(option_list = list(
 dir.create(file.path(opt$`out-dir`, "csv"), recursive = TRUE, showWarnings = FALSE)
 
 combined <- read.csv(file.path(opt$`sensitivity-dir`, "gene_sensitivity_combined.csv"))
-panel_genes <- read.csv(file.path(REFERENCE_DIR, "breast100_gene_list.csv"))$gene_symbol
-shared_panel_genes <- read.csv(file.path(REFERENCE_DIR, "shared_panel_gene_list.csv"))$gene_symbol
 cat("Loaded", nrow(combined), "gene x technology rows across", length(unique(combined$technology)), "technologies\n")
 
-shared_scope_native <- combined %>% filter(!technology %in% c("xenium_5k", "xenium_biomarkers"), gene %in% shared_panel_genes)
-shared_scope_proxy <- combined %>% filter(technology %in% c("xenium_5k", "xenium_biomarkers"), gene %in% panel_genes)
+# Each technology's shared-panel axis (plot_common.R's shared_gene_set_for()) - the literal shared
+# list, or panel_genes for the Xenium 5k/Xenium MM proxy.
+shared_scope <- combined %>%
+  group_by(technology) %>%
+  filter(gene %in% gene_list_for_set(shared_gene_set_for(first(technology)), gene)) %>%
+  ungroup()
 
 scopes <- list(
   own_panel = combined,
-  shared_panel_genes = bind_rows(shared_scope_native, shared_scope_proxy)
+  shared_panel_genes = shared_scope
 )
 for (s in names(scopes)) cat("Scope", s, ":", nrow(scopes[[s]]), "rows,",
                               length(unique(scopes[[s]]$technology)), "technologies with >0 rows\n")

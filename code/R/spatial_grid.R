@@ -34,15 +34,8 @@ dir.create(opt$`out-dir`, recursive = TRUE, showWarnings = FALSE)
 
 pal <- get_celltype_palette()
 
-ORDER <- c(
-  "stratamap_ill_5um_Grade1", "stratamap_ill_5um_Grade2", "stratamap_ill_5um_Grade3",
-  "visiumhd", "atera", "xenium_5k",
-  "xenium_biomarkers",  # targeted v2 (newer chemistry, multimodal staining)
-  "xenium_breast100"    # targeted v1 (earliest chemistry, nucleus-expansion only)
-)
-
 panels <- list()
-for (tech in ORDER) {
+for (tech in TECH_ORDER) {
   label <- CELL_LEVEL_SAMPLES$label[CELL_LEVEL_SAMPLES$technology == tech]
   p <- build_spatial_plot(tech, label, pal, point_size = opt$`point-size`, alpha = opt$alpha)
   if (is.null(p)) { cat("SKIPPING", tech, "- no spatial metadata\n"); next }

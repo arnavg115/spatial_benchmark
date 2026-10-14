@@ -46,6 +46,10 @@ Exact output filenames and reproduction commands for each are in `analysis_repor
   their own `03_generate_figures.sh` scripts, so those need that script to have run at least once;
   figure 2's UMAPs have no CSV fallback at all (see the report for why).
 - **`code/R/`, `code/python/`** - every script the two orchestration scripts above call.
+- **`benchmarks/mouse_brain/`** - a separate StrataMap vs. Trekker mouse brain benchmark that
+  reuses this pipeline's analysis scripts with its own samples, Allen Brain Cell Atlas reference and
+  shared gene axis - see its own README.md. Selected via `BENCHMARK=mouse_brain`; the default
+  (unset) is this breast comparison, unchanged.
 - **`reference/`** - small, non-sensitive lookup tables the pipeline needs: gene panel lists per
   technology, a gene biotype (protein-coding/lncRNA/etc.) table, the shared cell-type color
   palette, and the Chromium reference's cell-type taxonomy (see below).
